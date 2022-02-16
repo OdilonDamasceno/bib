@@ -1,0 +1,33 @@
+#!/bin/bash
+DEFAULTBIBFILE="$HOME"/citations.bib
+BIBREGEX="^10\.[0-9]{4,9}\/[-._;()\/:A-Z0-9]+$"
+
+if [ -z "$1" ]; then
+		echo "Usage:"
+		echo "$0 <DOI>"
+		exit 1
+fi
+
+if [[ $1 =~ $BIBREGEX ]]; then
+		DATA=$(wget --header='Accept: application/x-bibtex;charset=utf-8' https://doi.org/"$1" -q --show-progress --progress=dot -O-)
+		echo
+fi
+
+if [ -z "$DATA" ]; then
+	echo "Could not find this citation"
+	exit 1
+fi
+
+if [ -z "$BIBFILE" ]; then
+	touch "$DEFAULTBIBFILE"
+else
+	touch "$BIBFILE"
+	DEFAULTBIBFILE="$BIBFILE"
+fi
+
+if grep -q "$DATA" "$DEFAULTBIBFILE"; then
+  echo "This citation already exists"
+else 
+	echo "$DATA" >> "$DEFAULTBIBFILE"
+	echo
+fi
